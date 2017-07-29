@@ -243,46 +243,6 @@ export function shareToFavorite(data) {
 }
 
 /**
- * wechat pay
- * @param {Object} data
- * @param {String} data.partnerId
- * @param {String} data.prepayId
- * @param {String} data.nonceStr
- * @param {String} data.timeStamp
- * @param {String} data.package
- * @param {String} data.sign
- * @returns {Promise}
- */
-export function pay(data) {
-  // FIXME(Yorkie): see https://github.com/yorkie/react-native-wechat/issues/203
-  // Here the server-side returns params in lowercase, but here SDK requires timeStamp
-  // for compatibility, we make this correction for users.
-  function correct(actual, fixed) {
-    if (!data[fixed] && data[actual]) {
-      data[fixed] = data[actual];
-      delete data[actual];
-    }
-  }
-  correct('prepayid', 'prepayId');
-  correct('noncestr', 'nonceStr');
-  correct('partnerid', 'partnerId');
-  correct('timestamp', 'timeStamp');
-
-  return new Promise((resolve, reject) => {
-    WeChat.pay(data, result => {
-      if (result) reject(result);
-    });
-    emitter.once('PayReq.Resp', resp => {
-      if (resp.errCode === 0) {
-        resolve(resp);
-      } else {
-        reject(new WechatError(resp));
-      }
-    });
-  });
-}
-
-/**
  * promises will reject with this error when API call finish with an errCode other than zero.
  */
 export class WechatError extends Error {

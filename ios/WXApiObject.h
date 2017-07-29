@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import <UIKit/UIKit.h>
 /*! @brief 错误码
  *
  */
@@ -55,6 +55,7 @@ enum WXBizProfileType{
 enum WXMPWebviewType {
     WXMPWebviewType_Ad = 0,        /**< 广告网页 **/
 };
+
 
 
 /*! @brief 应用支持接收微信的文件类型
@@ -113,74 +114,6 @@ typedef NS_ENUM(UInt64, enAppSupportContentFlag)
 
 #pragma mark - WXMediaMessage
 @class WXMediaMessage;
-
-/*! @brief 第三方向微信终端发起支付的消息结构体
- *
- *  第三方向微信终端发起支付的消息结构体，微信终端处理后会向第三方返回处理结果
- * @see PayResp
- */
-@interface PayReq : BaseReq
-
-/** 商家向财付通申请的商家id */
-@property (nonatomic, retain) NSString *partnerId;
-/** 预支付订单 */
-@property (nonatomic, retain) NSString *prepayId;
-/** 随机串，防重发 */
-@property (nonatomic, retain) NSString *nonceStr;
-/** 时间戳，防重发 */
-@property (nonatomic, assign) UInt32 timeStamp;
-/** 商家根据财付通文档填写的数据和签名 */
-@property (nonatomic, retain) NSString *package;
-/** 商家根据微信开放平台文档对数据做的签名 */
-@property (nonatomic, retain) NSString *sign;
-
-@end
-
-
-
-#pragma mark - PayResp
-/*! @brief 微信终端返回给第三方的关于支付结果的结构体
- *
- *  微信终端返回给第三方的关于支付结果的结构体
- */
-@interface PayResp : BaseResp
-
-/** 财付通返回给商家的信息 */
-@property (nonatomic, retain) NSString *returnKey;
-
-@end
-
-
-
-/*! @brief 第三方向微信终端发起拆企业红包的消息结构体
- *
- *  第三方向微信终端发起拆企业红包的消息结构体，微信终端处理后会向第三方返回处理结果
- * @see HBReq
- */
-@interface HBReq : BaseReq
-
-/** 随机串，防重发 */
-@property (nonatomic, retain) NSString *nonceStr;
-/** 时间戳，防重发 */
-@property (nonatomic, assign) UInt32 timeStamp;
-/** 商家根据微信企业红包开发文档填写的数据和签名 */
-@property (nonatomic, retain) NSString *package;
-/** 商家根据微信企业红包开发文档对数据做的签名 */
-@property (nonatomic, retain) NSString *sign;
-
-@end
-
-
-
-#pragma mark - HBResp
-/*! @brief 微信终端返回给第三方的关于拆企业红包结果的结构体
- *
- *  微信终端返回给第三方的关于拆企业红包结果的结构体
- */
-@interface HBResp : BaseResp
-
-@end
-
 
 
 
@@ -351,6 +284,15 @@ typedef NS_ENUM(UInt64, enAppSupportContentFlag)
 @property (nonatomic, retain) NSString*  sessionFrom;
 @end
 
+#pragma mark - OpenTempSessionResp
+/*! @brief 微信终端向第三方程序返回的OpenTempSessionReq处理结果。
+ *
+ * 第三方程序向微信终端发送OpenTempSessionReq后，微信发送回来的处理结果，该结果用OpenTempSessionResp表示。
+ */
+@interface OpenTempSessionResp : BaseResp
+
+@end
+
 #pragma mark - OpenWebviewReq
 /* ! @brief 第三方通知微信启动内部浏览器，打开指定网页
  *
@@ -370,16 +312,6 @@ typedef NS_ENUM(UInt64, enAppSupportContentFlag)
  * 第三方程序向微信终端发送OpenWebviewReq后，微信发送回来的处理结果，该结果用OpenWebviewResp表示
  */
 @interface OpenWebviewResp : BaseResp
-
-@end
-
-
-#pragma mark - OpenTempSessionResp
-/*! @brief 微信终端向第三方程序返回的OpenTempSessionReq处理结果。
- *
- * 第三方程序向微信终端发送OpenTempSessionReq后，微信发送回来的处理结果，该结果用OpenTempSessionResp表示。
- */
-@interface OpenTempSessionResp : BaseResp
 
 @end
 
@@ -469,6 +401,32 @@ typedef NS_ENUM(UInt64, enAppSupportContentFlag)
 @property (nonatomic,retain) NSString* appID;
 @end;
 
+#pragma mark - WXInvoiceItem
+
+@interface WXInvoiceItem : NSObject
+/** 卡id
+ * @attention 长度不能超过1024字节
+ */
+@property (nonatomic,retain) NSString* cardId;
+/** ext信息
+ * @attention 长度不能超过2024字节
+ */
+@property (nonatomic,retain) NSString* extMsg;
+/**
+ * @attention 卡的状态,req不需要填。resp:0为未添加，1为已添加。
+ */
+@property (nonatomic,assign) UInt32 cardState;
+/**
+ * @attention req不需要填，chooseCard返回的。
+ */
+@property (nonatomic,retain) NSString* encryptCode;
+/**
+ * @attention req不需要填，chooseCard返回的。
+ */
+@property (nonatomic,retain) NSString* appID;
+
+@end
+
 #pragma mark - AddCardToWXCardPackageReq
 /* ! @brief 请求添加卡券至微信卡包
  *
@@ -521,6 +479,49 @@ typedef NS_ENUM(UInt64, enAppSupportContentFlag)
 @interface WXChooseCardResp : BaseResp
 @property (nonatomic,retain) NSArray* cardAry;
 @end
+
+
+#pragma mark - WXChooseInvoiceReq
+/* ! @brief 请求从微信选取发票
+ *
+ */
+@interface WXChooseInvoiceReq : BaseReq
+@property (nonatomic, strong) NSString *appID;
+@property (nonatomic, assign) UInt32 shopID;
+@property (nonatomic, strong) NSString *signType;
+@property (nonatomic, strong) NSString *cardSign;
+@property (nonatomic, assign) UInt32 timeStamp;
+@property (nonatomic, strong) NSString *nonceStr;
+@end
+
+#pragma mark - WXChooseInvoiceResp
+/** ! @brief 微信返回第三方请求选择发票结果
+ *
+ */
+@interface WXChooseInvoiceResp : BaseResp
+@property (nonatomic, strong) NSArray* cardAry;
+@end
+
+#pragma mark - WXSubscriptionReq
+@interface WXSubscribeMsgReq : BaseReq
+@property (nonatomic, assign) UInt32 scene;
+@property (nonatomic, strong) NSString * templateId;
+@property (nonatomic, strong) NSString * reserved;
+@end
+
+#pragma mark - WXSubscriptionReq
+@interface WXSubscribeMsgResp : BaseResp
+
+@property (nonatomic, strong) NSString *templateId;
+@property (nonatomic, assign) UInt32 scene;
+@property (nonatomic, strong) NSString *action;
+@property (nonatomic, strong) NSString * reserved;
+@property (nonatomic, strong) NSString * openId;
+
+@end
+
+#pragma mark - WXMediaMessage
+
 
 #pragma mark - WXMediaMessage
 
@@ -779,6 +780,24 @@ typedef NS_ENUM(UInt64, enAppSupportContentFlag)
 
 @end
 
+@interface WXMiniProgramObject : NSObject
+
+/*! @brief WXMiniProgramObject对象
+ *
+ * @note 返回的WXMiniProgramObject对象是自动释放的
+ */
++(WXMiniProgramObject *) object;
+
+@property (nonatomic, strong) NSString *webpageUrl; //低版本网页链接
+
+@property (nonatomic, strong) NSString *userName;   //小程序username
+
+@property (nonatomic, strong) NSString *path;       //小程序页面的路径
+
+@property (nonatomic, strong) NSData *hdImageData;   // 小程序新版本的预览图 128k
+
+@end
+
 
 #pragma mark - WXTextObject
 /*! @brief 多媒体消息中包含的文本数据对象
@@ -800,4 +819,3 @@ typedef NS_ENUM(UInt64, enAppSupportContentFlag)
 @property (nonatomic, retain) NSString *contentText;
 
 @end
-

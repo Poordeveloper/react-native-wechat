@@ -62,13 +62,6 @@ RCT_EXPORT_METHOD(registerApp:(NSString *)appid
     callback(@[[WXApi registerApp:appid] ? [NSNull null] : INVOKE_FAILED]);
 }
 
-RCT_EXPORT_METHOD(registerAppWithDescription:(NSString *)appid
-                  :(NSString *)appdesc
-                  :(RCTResponseSenderBlock)callback)
-{
-    callback(@[[WXApi registerApp:appid withDescription:appdesc] ? [NSNull null] : INVOKE_FAILED]);
-}
-
 RCT_EXPORT_METHOD(isWXAppInstalled:(RCTResponseSenderBlock)callback)
 {
     callback(@[[NSNull null], @([WXApi isWXAppInstalled])]);
@@ -148,26 +141,6 @@ RCT_EXPORT_METHOD(shareToSession:(NSDictionary *)data
                   :(RCTResponseSenderBlock)callback)
 {
     [self shareToWeixinWithData:data scene:WXSceneSession callback:callback];
-}
-
-RCT_EXPORT_METHOD(shareToFavorite:(NSDictionary *)data
-                  :(RCTResponseSenderBlock)callback)
-{
-    [self shareToWeixinWithData:data scene:WXSceneFavorite callback:callback];
-}
-
-RCT_EXPORT_METHOD(pay:(NSDictionary *)data
-                  :(RCTResponseSenderBlock)callback)
-{
-    PayReq* req             = [PayReq new];
-    req.partnerId           = data[@"partnerId"];
-    req.prepayId            = data[@"prepayId"];
-    req.nonceStr            = data[@"nonceStr"];
-    req.timeStamp           = [data[@"timeStamp"] unsignedIntValue];
-    req.package             = data[@"package"];
-    req.sign                = data[@"sign"];
-    BOOL success = [WXApi sendReq:req];
-    callback(@[success ? [NSNull null] : INVOKE_FAILED]);
 }
 
 - (void)shareToWeixinWithData:(NSDictionary *)aData
@@ -381,15 +354,7 @@ RCT_EXPORT_METHOD(pay:(NSDictionary *)data
 	    else {
 	        [self.bridge.eventDispatcher sendDeviceEventWithName:RCTWXEventName body:body];
 	    }
-	} else if ([resp isKindOfClass:[PayResp class]]) {
-	        PayResp *r = (PayResp *)resp;
-	        NSMutableDictionary *body = @{@"errCode":@(r.errCode)}.mutableCopy;
-	        body[@"errStr"] = r.errStr;
-	        body[@"type"] = @(r.type);
-	        body[@"returnKey"] =r.returnKey;
-	        body[@"type"] = @"PayReq.Resp";
-	        [self.bridge.eventDispatcher sendDeviceEventWithName:RCTWXEventName body:body];
-    	}
+	}
 }
 
 @end
