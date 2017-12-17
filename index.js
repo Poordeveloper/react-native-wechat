@@ -1,6 +1,6 @@
 'use strict';
 
-import { DeviceEventEmitter, NativeModules } from 'react-native';
+import { DeviceEventEmitter, NativeModules, Platform } from 'react-native';
 import { EventEmitter } from 'events';
 
 let isAppRegistered = false;
@@ -242,9 +242,6 @@ export function shareToFavorite(data) {
   });
 }
 
-/**
- * promises will reject with this error when API call finish with an errCode other than zero.
- */
 export class WechatError extends Error {
   constructor(resp) {
     const message = resp.errStr || resp.errCode.toString();
